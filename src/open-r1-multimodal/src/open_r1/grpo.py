@@ -25,6 +25,18 @@ from math_verify import parse, verify
 from open_r1.trainer import Qwen2VLGRPOTrainer
 from trl import GRPOConfig, GRPOTrainer, ModelConfig, ScriptArguments, TrlParser, get_peft_config
 
+# swanlab config
+from swanlab.integration.transformers import SwanLabCallback
+SWANLAB_API_KEY = os.environ.get("SWANLAB_API_KEY", None)
+if SWANLAB_API_KEY:
+    swanlab.login(api_key=SWANLAB_API_KEY)
+
+# 实例化 callback
+swanlab_callback = SwanLabCallback(
+    project="R1-V",
+    experiment_name="R1-V: Qwen2-VL-2B + clevr_cogen_a_train"
+    description=" Reinforcing Super Generalization Ability in Vision Language Models with Less Than $3",
+)
 
 @dataclass
 class GRPOScriptArguments(ScriptArguments):
@@ -186,6 +198,7 @@ def main(script_args, training_args, model_args):
         attn_implementation=model_args.attn_implementation,
         max_pixels=script_args.max_pixels,
         min_pixels=script_args.min_pixels,
+        callback=[swanlab_callback]
     )
 
     # Train and push the model to the Hub
